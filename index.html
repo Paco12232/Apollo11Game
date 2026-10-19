@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Apollo 11: To the Moon and Beyond</title>
   <style>
     * {
@@ -10,6 +10,15 @@
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
     }
 
     body {
@@ -20,13 +29,17 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
+      min-height: 100dvh;
+      padding: 10px;
     }
 
     #game-container {
       position: relative;
-      width: 850px;
-      height: 620px;
+      width: 100%;
+      max-width: 850px;
+      aspect-ratio: 850 / 620;
+      max-height: 98vh;
+      max-height: 98dvh;
       background: #000;
       border: 3px solid #1e293b;
       border-radius: 12px;
@@ -38,6 +51,7 @@
       display: block;
       width: 100%;
       height: 100%;
+      touch-action: none;
     }
 
     .overlay-screen {
@@ -52,9 +66,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 30px;
+      padding: 20px;
       text-align: center;
       z-index: 10;
+      overflow-y: auto;
     }
 
     .hidden {
@@ -62,37 +77,37 @@
     }
 
     h1 {
-      font-size: 2.8rem;
-      letter-spacing: 6px;
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      letter-spacing: 4px;
       color: #38bdf8;
       text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       font-weight: 800;
     }
 
     h2 {
-      font-size: 1.2rem;
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
       color: #94a3b8;
       font-weight: 300;
-      margin-bottom: 18px;
-      letter-spacing: 3px;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
     }
 
     .tagline {
       font-style: italic;
       color: #38bdf8;
-      margin-bottom: 18px;
-      font-size: 0.92rem;
+      margin-bottom: 12px;
+      font-size: clamp(0.78rem, 2vw, 0.92rem);
     }
 
     .menu-box {
       background: rgba(15, 23, 42, 0.88);
       border: 1px solid #334155;
       border-radius: 10px;
-      padding: 14px 20px;
-      margin-bottom: 12px;
-      width: 95%;
+      padding: 10px 16px;
+      margin-bottom: 10px;
+      width: 100%;
       max-width: 680px;
       text-align: left;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -100,21 +115,21 @@
 
     .menu-box h3 {
       color: #38bdf8;
-      font-size: 1.1rem;
-      margin-bottom: 6px;
+      font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+      margin-bottom: 4px;
       border-bottom: 1px solid #334155;
       padding-bottom: 4px;
     }
 
     .menu-box p, .menu-box ul {
-      font-size: 0.88rem;
-      line-height: 1.45;
+      font-size: clamp(0.75rem, 1.8vw, 0.88rem);
+      line-height: 1.4;
       color: #cbd5e1;
     }
 
     .menu-box ul {
       list-style-type: square;
-      padding-left: 20px;
+      padding-left: 18px;
     }
 
     .menu-box a {
@@ -129,21 +144,24 @@
 
     .menu-buttons {
       display: flex;
-      gap: 12px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .btn {
       background: linear-gradient(135deg, #0284c7, #0369a1);
       color: white;
       border: 1px solid #38bdf8;
-      padding: 10px 24px;
-      font-size: 0.95rem;
+      padding: 8px 18px;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
       font-weight: 700;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
       letter-spacing: 1px;
+      touch-action: manipulation;
     }
 
     .btn:hover:not(:disabled) {
@@ -172,11 +190,12 @@
 
     #hud {
       position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
+      top: 8px;
+      left: 8px;
+      right: 8px;
       display: flex;
       justify-content: space-between;
+      gap: 4px;
       pointer-events: none;
       z-index: 5;
     }
@@ -184,12 +203,13 @@
     .hud-card {
       background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 6px 12px;
+      padding: 4px 8px;
       border-radius: 6px;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 0.85rem;
+      font-size: clamp(0.65rem, 1.6vw, 0.85rem);
       color: #38bdf8;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      white-space: nowrap;
     }
 
     .modal-dialog {
@@ -200,9 +220,11 @@
       background: rgba(15, 23, 42, 0.97);
       border: 2px solid #38bdf8;
       border-radius: 12px;
-      padding: 22px;
-      width: 90%;
+      padding: 16px;
+      width: 92%;
       max-width: 620px;
+      max-height: 90%;
+      overflow-y: auto;
       z-index: 20;
       box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
       text-align: left;
@@ -210,17 +232,17 @@
 
     .modal-dialog h3 {
       color: #38bdf8;
-      margin-bottom: 10px;
-      font-size: 1.2rem;
+      margin-bottom: 8px;
+      font-size: clamp(0.95rem, 2.3vw, 1.2rem);
     }
 
     .modal-dialog p {
-      font-size: 0.94rem;
-      line-height: 1.55;
+      font-size: clamp(0.8rem, 2vw, 0.94rem);
+      line-height: 1.45;
       color: #f1f5f9;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       background: rgba(30, 41, 59, 0.6);
-      padding: 12px;
+      padding: 10px;
       border-left: 4px solid #38bdf8;
       border-radius: 4px;
     }
@@ -237,30 +259,30 @@
       background: rgba(30, 41, 59, 0.9);
       color: #f8fafc;
       border: 1px solid #475569;
-      padding: 10px 16px;
-      margin: 8px 0;
+      padding: 8px 14px;
+      margin: 6px 0;
       border-radius: 8px;
       cursor: pointer;
       text-align: left;
-      font-size: 0.92rem;
+      font-size: clamp(0.78rem, 1.9vw, 0.92rem);
       transition: all 0.2s;
+      touch-action: manipulation;
     }
 
     .quiz-option:hover {
       background: #0284c7;
       border-color: #38bdf8;
-      transform: translateX(4px);
     }
 
     .apa-references {
       background: #090d16;
       border: 1px solid #1e293b;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
-      font-size: 0.8rem;
-      line-height: 1.5;
+      font-size: clamp(0.68rem, 1.5vw, 0.8rem);
+      line-height: 1.45;
       color: #94a3b8;
-      max-height: 170px;
+      max-height: 140px;
       overflow-y: auto;
       text-align: left;
       margin-top: 8px;
@@ -273,35 +295,48 @@
     }
 
     .apa-entry {
-      padding-left: 20px;
-      text-indent: -20px;
-      margin-bottom: 8px;
+      padding-left: 16px;
+      text-indent: -16px;
+      margin-bottom: 6px;
     }
 
     #touch-controls {
       position: absolute;
-      bottom: 15px;
-      left: 15px;
-      right: 15px;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
-      z-index: 5;
+      align-items: center;
+      z-index: 15;
       pointer-events: none;
     }
 
-    .touch-btn {
+    .touch-group {
+      display: flex;
+      gap: 8px;
       pointer-events: auto;
-      background: rgba(30, 41, 59, 0.6);
-      border: 2px solid rgba(56, 189, 248, 0.5);
+    }
+
+    .touch-btn {
+      background: rgba(30, 41, 59, 0.75);
+      border: 2px solid rgba(56, 189, 248, 0.6);
       color: white;
-      width: 50px;
-      height: 50px;
+      width: clamp(42px, 11vw, 52px);
+      height: clamp(42px, 11vw, 52px);
       border-radius: 50%;
-      font-size: 1.2rem;
+      font-size: clamp(1.1rem, 3vw, 1.3rem);
       display: flex;
       justify-content: center;
       align-items: center;
-      touch-action: manipulation;
+      touch-action: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .touch-btn:active {
+      background: rgba(2, 132, 199, 0.9);
+      border-color: #38bdf8;
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -329,8 +364,8 @@
       <div class="menu-box">
         <h3>🎮 Controls & Navigation</h3>
         <ul>
-          <li><b>Spacebar / Click:</b> Timing Ignition (Stage 1) & Action.</li>
-          <li><b>WASD / Arrow Keys:</b> Lander Thrusters (Stage 2) & Labyrinth Exploration (Stage 3).</li>
+          <li><b>Spacebar / Screen Tap:</b> Timing Ignition (Stage 1) & Action.</li>
+          <li><b>WASD / Arrow Keys / On-Screen Buttons:</b> Lander Thrusters (Stage 2) & Exploration (Stage 3).</li>
           <li><b>M Key:</b> Toggle Background Space Music & SFX.</li>
         </ul>
       </div>
@@ -342,7 +377,7 @@
     </div>
 
     <div id="instructions-modal" class="overlay-screen hidden">
-      <div class="menu-box" style="max-height: 440px; overflow-y: auto;">
+      <div class="menu-box" style="max-height: 380px; overflow-y: auto;">
         <h3>Academic Citations & Online Sources</h3>
         <p>This project fulfills all Earth Science 11 requirements with integrated factual data and APA 7th Edition citations. Click any direct link below to verify the specific scientific records:</p>
         <br>
@@ -353,7 +388,7 @@
           <li><b><a href="https://www.lpi.usra.edu/lunar/missions/apollo/apollo_11/" target="_blank" rel="noopener noreferrer">World Book / LPI Apollo 11 Overview (2024)</a>:</b> Lunar rock sample analysis (Basalt & Breccia) proving 3.7–4.5B year moon age.</li>
         </ul>
       </div>
-      <button id="btn-close-instructions" class="btn">RETURN TO MENU</button>
+      <button id="btn-close-instructions" class="btn" style="margin-top: 10px;">RETURN TO MENU</button>
     </div>
 
     <div id="dialog-modal" class="modal-dialog hidden">
@@ -367,13 +402,13 @@
       <p id="quiz-subtitle" class="tagline">Verify your scientific knowledge to complete the mission log:</p>
 
       <div id="quiz-container" class="quiz-box">
-        <h3 id="quiz-question" style="color:#38bdf8; margin-bottom:10px; font-size: 1.05rem;">Loading Question...</h3>
+        <h3 id="quiz-question" style="color:#38bdf8; margin-bottom:8px; font-size: clamp(0.9rem, 2.2vw, 1.05rem);">Loading Question...</h3>
         <div id="quiz-options"></div>
       </div>
 
       <div id="final-results" class="hidden" style="width: 100%; max-width: 680px;">
         <h2 id="final-score-text">Final Score: 5 / 5</h2>
-        <p style="font-size:0.88rem; color:#cbd5e1; margin-bottom:8px;">Project References (APA 7th Edition Format - Direct Article Links):</p>
+        <p style="font-size:0.8rem; color:#cbd5e1; margin-bottom:6px;">Project References (APA 7th Edition Format - Direct Article Links):</p>
         <div class="apa-references">
           <div class="apa-entry">Chaikin, A. (2021). <i>50 Years Ago: One Small Step, One Giant Leap (Apollo 11 Landing & Alarms)</i>. NASA History Division. <a href="https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/" target="_blank" rel="noopener noreferrer">https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/</a></div>
           <div class="apa-entry">Gale Science in Context. (2023). <i>About the Moon: Formation & Giant Impact Theory</i>. NASA Solar System Exploration. <a href="https://moon.nasa.gov/inside-and-out/about-the-moon/" target="_blank" rel="noopener noreferrer">https://moon.nasa.gov/inside-and-out/about-the-moon/</a></div>
@@ -381,7 +416,7 @@
           <div class="apa-entry">World Book & LPI. (2024). <i>Apollo 11 Mission Overview & Sample Analysis</i>. Lunar and Planetary Institute. <a href="https://www.lpi.usra.edu/lunar/missions/apollo/apollo_11/" target="_blank" rel="noopener noreferrer">https://www.lpi.usra.edu/lunar/missions/apollo/apollo_11/</a></div>
         </div>
         <br>
-        <div style="display:flex; gap:10px; justify-content:center;">
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button id="btn-copy-refs" class="btn secondary-btn">📋 COPY APA REFERENCES</button>
           <button id="btn-restart-game" class="btn">🔄 REPLAY MISSION</button>
         </div>
@@ -389,10 +424,14 @@
     </div>
 
     <div id="touch-controls" class="hidden">
-      <div class="touch-btn" id="t-left">◀</div>
-      <div class="touch-btn" id="t-up">▲</div>
-      <div class="touch-btn" id="t-down">▼</div>
-      <div class="touch-btn" id="t-right">▶</div>
+      <div class="touch-group">
+        <div class="touch-btn" id="t-left">◀</div>
+        <div class="touch-btn" id="t-right">▶</div>
+      </div>
+      <div class="touch-group">
+        <div class="touch-btn" id="t-up">▲</div>
+        <div class="touch-btn" id="t-down">▼</div>
+      </div>
     </div>
   </div>
 
@@ -410,6 +449,8 @@
         if (!this.ctx) {
           this.ctx = new (window.AudioContext || window.webkitAudioContext)();
           this.startMusicLoop();
+        } else if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
         }
       }
 
@@ -547,23 +588,38 @@
     });
     window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-    ['t-left', 't-up', 't-down', 't-right'].forEach(id => {
+    function bindTouchBtn(id, keyName) {
       const el = document.getElementById(id);
-      el.addEventListener('touchstart', (e) => {
-        e.preventDefault();
+      if (!el) return;
+
+      const press = (e) => {
+        if (e) e.preventDefault();
         audio.init();
-        if (id === 't-left') keys['ArrowLeft'] = true;
-        if (id === 't-up') keys['ArrowUp'] = true;
-        if (id === 't-down') keys['ArrowDown'] = true;
-        if (id === 't-right') keys['ArrowRight'] = true;
-      });
-      el.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        if (id === 't-left') keys['ArrowLeft'] = false;
-        if (id === 't-up') keys['ArrowUp'] = false;
-        if (id === 't-down') keys['ArrowDown'] = false;
-        if (id === 't-right') keys['ArrowRight'] = false;
-      });
+        keys[keyName] = true;
+      };
+
+      const release = (e) => {
+        if (e) e.preventDefault();
+        keys[keyName] = false;
+      };
+
+      el.addEventListener('pointerdown', press);
+      el.addEventListener('pointerup', release);
+      el.addEventListener('pointercancel', release);
+      el.addEventListener('touchstart', press, { passive: false });
+      el.addEventListener('touchend', release, { passive: false });
+    }
+
+    bindTouchBtn('t-left', 'ArrowLeft');
+    bindTouchBtn('t-right', 'ArrowRight');
+    bindTouchBtn('t-up', 'ArrowUp');
+    bindTouchBtn('t-down', 'ArrowDown');
+
+    canvas.addEventListener('pointerdown', (e) => {
+      audio.init();
+      if (gameState === STATES.LEVEL1) {
+        keys['Space'] = true;
+      }
     });
 
     document.getElementById('btn-start-game').addEventListener('click', () => {
@@ -629,7 +685,7 @@
       gameState = STATES.LEVEL1;
       hudStatus.innerText = "STAGE 1: SATURN V IGNITION";
       hudFuel.innerText = "THRUST: READY";
-      hudTelemetry.innerText = "PRESS SPACEBAR / CLICK IN GREEN ZONE";
+      hudTelemetry.innerText = "PRESS SPACEBAR / TAP SCREEN IN GREEN ZONE";
       l1BarPos = 0;
       l1Success = false;
       touchControls.classList.add('hidden');
